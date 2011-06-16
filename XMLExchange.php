@@ -247,8 +247,8 @@ class XMLExchange extends Backend
 		$arrTempModule = deserialize($objExport->moduleFields);
 		$arrModuleIds = deserialize($objExport->module);
 
-		$objPages = $this->Database->execute("SELECT id," . implode(',', $arrTempModule) . " FROM tl_module WHERE id IN (" . implode(',', $arrModuleIds) . ")");
-		$this->generateXML($objXML, $objTables, $objPages, 'tl_module');
+		$objModules = $this->Database->execute("SELECT id," . implode(',', $arrTempModule) . " FROM tl_module WHERE id IN (" . implode(',', $arrModuleIds) . ")");
+		$this->generateXML($objXML, $objTables, $objModules, 'tl_module');
 
 		$strXML = $objXML->saveXML();
 
@@ -369,6 +369,19 @@ class XMLExchange extends Backend
 				if ($GLOBALS['TL_DCA'][$strTable]['fields'][$k]['eval']['rgxp'] != '')
 				{
 					$field->setAttribute('rgxp', $GLOBALS['TL_DCA'][$strTable]['fields'][$k]['eval']['rgxp']);
+				}
+
+				
+				// check if the value is an serialized array
+				if (is_array(deserialize($v)))
+				{
+					foreach (deserialize($v) as $k=>$v)
+					{
+						$temp = $objXML->createElement($k, $v);
+						$temp->setAttribute('serialized', '1');
+						$field->appendChild($temp);
+						unset($temp);
+					}
 				}
 
 				$field = $row->appendChild($field);
