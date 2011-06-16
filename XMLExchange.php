@@ -217,13 +217,54 @@ class XMLExchange extends Backend
 		{
 			case 'pagetree':
 				return $this->exportPagetree($objExport);
+
+			case 'module':
+				return $this->exportModule($objExport);
 			
 			default:
 				return '<p class="tl_gerror">Export type not found.</p>';
 		}
 	}
-	
-	
+
+
+	protected function exportModule($objExport)
+	{
+		// Romanize the name
+		$strName = utf8_romanize($objExport->name);
+		$strName = strtolower(str_replace(' ', '_', $strName));
+		$strName = preg_replace('/[^A-Za-z0-9_-]/', '', $strName);
+		$strName = basename($strName);
+
+		// Create a new XML document
+		$objXML = new DOMDocument('1.0', 'UTF-8');
+		$objXML->formatOutput = true;
+		
+		// Root element
+		$objTables = $objXML->createElement('tables');
+		$objTables = $objXML->appendChild($objTables);
+
+		// prepare fields
+		$arrTempModule = deserialize($objExport->moduleFields);
+		$arrModuleIds = deserialize($objExport->module);
+
+		$objPages = $this->Database->execute("SELECT id," . implode(',', $arrTempModule) . " FROM tl_module WHERE id IN (" . implode(',', $arrModuleIds) . ")");
+		$this->generateXML($objXML, $objTables, $objPages, 'tl_module');
+
+		$strXML = $objXML->saveXML();
+
+		header('Content-Type: application/imt');
+		header('Content-Transfer-Encoding: binary');
+		header('Content-Disposition: attachment; filename="' . $strName . '.xml"');
+		header('Content-Length: ' . strlen($strXML));
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		header('Expires: 0');
+
+		echo $strXML;
+
+		exit;
+	}
+
 	protected function exportPagetree($objExport)
 	{
 		// Romanize the name
@@ -263,7 +304,6 @@ class XMLExchange extends Backend
 
 		$blnArticles = (is_array($arrTempArticles) && count($arrTempArticles));
 		$blnContentElement = (is_array($arrTempContentElements) && count($arrTempContentElements));
-
 
 		if ( $blnArticles || $blnContentElement)
 		{

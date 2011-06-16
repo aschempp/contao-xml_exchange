@@ -21,5 +21,7 @@ CREATE TABLE `tl_xml_exchange` (
   `pages` blob NULL,
   `articles` blob NULL,
   `contentElements` blob NULL,
+  `module` blob NULL,
+  `moduleFields` blob NULL,
   PRIMARY KEY  (`id`),
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

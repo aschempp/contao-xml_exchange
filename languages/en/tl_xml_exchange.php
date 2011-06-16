@@ -40,6 +40,9 @@ $GLOBALS['TL_LANG']['tl_xml_exchange']['pages']				= array('Export pages', 'Expo
 $GLOBALS['TL_LANG']['tl_xml_exchange']['articles']			= array('Export articles', 'Export tl_article data.');
 $GLOBALS['TL_LANG']['tl_xml_exchange']['contentElements']	= array('Export content elements', 'Export tl_content data.');
 $GLOBALS['TL_LANG']['tl_xml_exchange']['source']			= array('XML file', 'Please select the XML file from your files.');
+$GLOBALS['TL_LANG']['tl_xml_exchange']['module']			= array('Module', 'Please select all modules you want in your XML Export.');
+$GLOBALS['TL_LANG']['tl_xml_exchange']['moduleFields']		= array('Module fields', 'Please select all fields you want in your XML export.');
+
 
 
 /**
@@ -65,6 +68,7 @@ $GLOBALS['TL_LANG']['tl_xml_exchange']['export_legend']	= 'Export Settings';
  * References
  */
 $GLOBALS['TL_LANG']['tl_xml_exchange']['type']['pagetree']	= 'Pages/Articles/Content Elements';
+$GLOBALS['TL_LANG']['tl_xml_exchange']['type']['module']	= 'Modules';
 $GLOBALS['TL_LANG']['tl_xml_exchange']['confirmImport']		= 'Confirm XML import';
 $GLOBALS['TL_LANG']['tl_xml_exchange']['fieldInTable']		= 'Updating %s rows in table "%s".';
 

@@ -116,6 +116,7 @@ $GLOBALS['TL_DCA']['tl_xml_exchange'] = array
 		'__selector__'					=> array('type'),
 		'default'						=> '{name_legend},type,name',
 		'pagetree'						=> '{name_legend},type,name;{export_legend},pageTree,inherit,pages,articles,contentElements',
+		'module'						=> '{name_legend},type,name;{export_legend},module,moduleFields;'
 	),
 
 	// Fields
@@ -126,7 +127,7 @@ $GLOBALS['TL_DCA']['tl_xml_exchange'] = array
 			'label'						=> &$GLOBALS['TL_LANG']['tl_xml_exchange']['type'],
 			'default'					=> 'pagetree',
 			'inputType'					=> 'select',
-			'options'					=> array('pagetree'),
+			'options'					=> array('pagetree', 'module'),
 			'reference'					=> &$GLOBALS['TL_LANG']['tl_xml_exchange']['type'],
 			'eval'						=> array('mandatory'=>true, 'submitOnChange'=>true, 'tl_class'=>'clr'),
 		),
@@ -173,7 +174,21 @@ $GLOBALS['TL_DCA']['tl_xml_exchange'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_xml_exchange']['source'],
 			'eval'                    => array('fieldType'=>'radio', 'files'=>true, 'filesOnly'=>true, 'extensions'=>'xml', 'class'=>'mandatory')
-		)
+		),
+		'module' => array
+		(
+			'label'						=> &$GLOBALS['TL_LANG']['tl_xml_exchange']['module'],
+			'inputType'					=> 'checkbox',
+			'options_callback'			=> array('tl_xml_exchange', 'getModule'),
+			'eval'						=> array('tl_class'=>'clr', 'multiple'=>true),
+		),
+		'moduleFields' => array
+		(
+			'label'						=> &$GLOBALS['TL_LANG']['tl_xml_exchange']['moduleFields'],
+			'inputType'					=> 'checkbox',
+			'options_callback'			=> array('tl_xml_exchange', 'getModuleFields'),
+			'eval'						=> array('tl_class'=>'clr', 'multiple'=>true),
+		),
 	)
 );
 
@@ -206,6 +221,42 @@ class tl_xml_exchange extends Backend
 	public function getContentElements()
 	{
 		return $this->getOptionData('tl_content');
+	}
+
+
+	/**
+	 * return all modules sorted by the themes
+	 */
+	public function getModule()
+	{
+		$arrReturn = array();
+		$objThemes = $this->Database->query('SELECT * FROM tl_theme');
+		
+		while ($objThemes->next())
+		{
+			$objThemeModules = $this->Database->prepare('SELECT id,name,type FROM tl_module WHERE pid=?')
+											  ->executeUncached($objThemes->id);
+
+			$arrTemp = array();
+			while($objThemeModules->next())
+			{
+				$arrTemp[$objThemeModules->id] = $objThemeModules->name . ' <span style="color:#b3b3b3; padding-left:3px;">[' . $GLOBALS['TL_LANG']['FMD'][$objThemeModules->type][0] . ']</span>';
+			}
+
+			$arrReturn[$objThemes->name] = $arrTemp;
+			unset($arrTemp);
+		}
+		
+		return $arrReturn;
+	}
+
+
+	/**
+	 * return all fields in tl_module
+	 */
+	public function getModuleFields()
+	{
+		return $this->getOptionData('tl_module');
 	}
 
 
