@@ -152,19 +152,22 @@ $GLOBALS['TL_DCA']['tl_xml_exchange'] = array
 		(
 			'label'						=> &$GLOBALS['TL_LANG']['tl_xml_exchange']['pages'],
 			'inputType'					=> 'checkbox',
-			'eval'						=> array('tl_class'=>'w50'),
+			'options_callback'			=> array('tl_xml_exchange', 'getPages'),
+			'eval'						=> array('tl_class'=>'clr', 'multiple'=>true),
 		),
 		'articles' => array
 		(
 			'label'						=> &$GLOBALS['TL_LANG']['tl_xml_exchange']['articles'],
 			'inputType'					=> 'checkbox',
-			'eval'						=> array('tl_class'=>'w50'),
+			'options_callback'			=> array('tl_xml_exchange', 'getArticles'),
+			'eval'						=> array('tl_class'=>'clr', 'multiple'=>true),
 		),
 		'contentElements' => array
 		(
 			'label'						=> &$GLOBALS['TL_LANG']['tl_xml_exchange']['contentElements'],
 			'inputType'					=> 'checkbox',
-			'eval'						=> array('tl_class'=>'w50'),
+			'options_callback'			=> array('tl_xml_exchange', 'getContentElements'),
+			'eval'						=> array('tl_class'=>'clr', 'multiple'=>true),
 		),
 		'source' => array
 		(
@@ -174,3 +177,56 @@ $GLOBALS['TL_DCA']['tl_xml_exchange'] = array
 	)
 );
 
+/**
+ * Provide helper methods for the DCA tl_xml_exchange
+ */
+class tl_xml_exchange extends Backend
+{
+	/**
+	 * return all fields in tl_page
+	 */
+	public function getPages()
+	{
+		return $this->getOptionData('tl_page');
+	}
+
+
+	/**
+	 * return all fields in tl_article
+	 */
+	public function getArticles()
+	{
+		return $this->getOptionData('tl_article');
+	}
+
+
+	/**
+	 * return all fields in tl_content
+	 */
+	public function getContentElements()
+	{
+		return $this->getOptionData('tl_content');
+	}
+
+
+	/**
+	 * Return all dca fields from a dca
+	 * 
+	 * @param string $strName
+	 * @return array
+	 */
+	protected function getOptionData($strName)
+	{
+		$this->loadDataContainer($strName);
+		$this->loadLanguageFile($strName);
+		$arrReturn = array();
+
+		foreach ($GLOBALS['TL_DCA'][$strName]['fields'] as $k=>$v)
+		{
+			$arrReturn[$k] = $v['label'][0];
+		}
+
+		return $arrReturn;
+	}
+}
+?>

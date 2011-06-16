@@ -18,9 +18,8 @@ CREATE TABLE `tl_xml_exchange` (
   `type` varchar(32) NOT NULL default '',
   `pageTree` text NULL,
   `inherit` char(1) NOT NULL default '',
-  `pages` char(1) NOT NULL default '',
-  `articles` char(1) NOT NULL default '',
-  `contentElements` char(1) NOT NULL default '',
+  `pages` blob NULL,
+  `articles` blob NULL,
+  `contentElements` blob NULL,
   PRIMARY KEY  (`id`),
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-

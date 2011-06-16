@@ -249,25 +249,35 @@ class XMLExchange extends Backend
 				$arrPages = array_merge($arrPages, $this->getChildRecords($page, 'tl_page'));
 			}
 		}
-		
-		if ($objExport->pages)
+
+		// prepare fields
+		$arrTempPages = deserialize($objExport->pages);
+		$arrTempArticles = deserialize($objExport->articles);
+		$arrTempContentElements = deserialize($objExport->contentElements);
+
+		if (is_array($arrTempPages) && count($arrTempPages))
 		{
-			$objPages = $this->Database->execute("SELECT * FROM tl_page WHERE id IN (" . implode(',', $arrPages) . ")");
+			$objPages = $this->Database->execute("SELECT id," . implode(',', $arrTempPages) . " FROM tl_page WHERE id IN (" . implode(',', $arrPages) . ")");
 			$this->generateXML($objXML, $objTables, $objPages, 'tl_page');
 		}
-		
-		if ($objExport->articles || $objExport->contentElements)
+
+		$blnArticles = (is_array($arrTempArticles) && count($arrTempArticles));
+		$blnContentElement = (is_array($arrTempContentElements) && count($arrTempContentElements));
+
+
+		if ( $blnArticles || $blnContentElement)
 		{
-			$objArticles = $this->Database->execute("SELECT * FROM tl_article WHERE pid IN (" . implode(',', $arrPages) . ")");
+			// we need the id everytime for the content pid
+			$objArticles = $this->Database->execute("SELECT id," . implode(',', $arrTempArticles) . " FROM tl_article WHERE pid IN (" . implode(',', $arrPages) . ")");
 			
-			if ($objExport->articles && $objArticles->numRows)
+			if ($blnArticles && $objArticles->numRows)
 			{
 				$this->generateXML($objXML, $objTables, $objArticles, 'tl_article');
 			}
 			
-			if ($objExport->contentElements && $objArticles->numRows)
+			if ($blnContentElement && $objArticles->numRows)
 			{
-				$objElements = $this->Database->execute("SELECT * FROM tl_content WHERE pid IN (" . implode(',', $objArticles->fetchEach('id')) . ")");
+				$objElements = $this->Database->execute("SELECT id," . implode(',', $arrTempContentElements) . " FROM tl_content WHERE pid IN (" . implode(',', $objArticles->fetchEach('id')) . ")");
 				$this->generateXML($objXML, $objTables, $objElements, 'tl_content');
 			}
 		}
@@ -296,7 +306,7 @@ class XMLExchange extends Backend
 		$table = $objXML->createElement('table');
 		$table->setAttribute('name', $strTable);
 		$table = $objTables->appendChild($table);
-		
+
 		while( $objResult->next() )
 		{
 			$row = $objXML->createElement('row');
@@ -310,6 +320,17 @@ class XMLExchange extends Backend
 
 				$field = $objXML->createElement('field');
 				$field->setAttribute('name', $k);
+				
+				if ($GLOBALS['TL_DCA'][$strTable]['fields'][$k]['eval']['maxlength'] > 0)
+				{
+					$field->setAttribute('maxlength', $GLOBALS['TL_DCA'][$strTable]['fields'][$k]['eval']['maxlength']);
+				}
+
+				if ($GLOBALS['TL_DCA'][$strTable]['fields'][$k]['eval']['rgxp'] != '')
+				{
+					$field->setAttribute('rgxp', $GLOBALS['TL_DCA'][$strTable]['fields'][$k]['eval']['rgxp']);
+				}
+
 				$field = $row->appendChild($field);
 	
 				if (is_null($v))
